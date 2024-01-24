@@ -2,17 +2,22 @@
 import { defineStore } from 'pinia';
 
 interface Question {
-  id: number;
+  _id: string;
   question: string;
   options: string[];
   correctOption: number;
+}
+
+interface UserChoice {
+  questionId: string;
+  answerIndex: number;
 }
 
 interface ExamState {
   questions: Question[];
   currentQuestionIndex: number;
   isLoading: boolean;
-  userChoices: Record<number, number>; // Record to enforce the shape of userChoices
+  userChoices: UserChoice[];
 }
 
 export const useExamStore = defineStore('exam', {
@@ -20,7 +25,7 @@ export const useExamStore = defineStore('exam', {
     questions: [],
     currentQuestionIndex: 0,
     isLoading: true,
-    userChoices: {},
+    userChoices: [],
   }),
 
   getters: {
@@ -30,7 +35,10 @@ export const useExamStore = defineStore('exam', {
         return false;
       }
 
-      return state.questions.every(question => state.userChoices[question.id] !== undefined);
+      // Check if there is a choice for each question
+      return state.questions.every(question =>
+        state.userChoices.some(choice => choice.questionId === question._id)
+      );
     },
   },
 
@@ -65,14 +73,15 @@ export const useExamStore = defineStore('exam', {
     },
 
     // New action to handle storing user choices
-    answerQuestion(selectedOption: number) {
+    answerQuestion(selectedOption: number | null): void {
       if (selectedOption !== null) {
-        this.userChoices[this.currentQuestion.id] = selectedOption;
+        const currentQuestion = this.questions[this.currentQuestionIndex];
+        this.userChoices.push({ questionId: currentQuestion._id, answerIndex: selectedOption });
       }
     },
 
     // Helper function to shuffle an array using Fisher-Yates algorithm
-    shuffleArray(array: any[]) {
+    shuffleArray<T>(array: T[]): T[] {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];

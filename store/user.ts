@@ -1,19 +1,16 @@
-// src/store/index.ts
-
 import { defineStore } from 'pinia';
 
-interface AppState {
+interface UserState {
   userName: string;
 }
 
-export const useUserStore = defineStore({
-  id: 'app',
-  state: (): AppState => ({
+export const useUserStore = defineStore('user', {
+  state: (): UserState => ({
     userName: '',
   }),
   getters: {
-    getUserName(): string {
-      return this.userName;
+    getUserName(state): string {
+      return state.userName;
     },
   },
   actions: {

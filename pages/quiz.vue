@@ -38,12 +38,12 @@
         <p class="text-lg font-semibold mb-2">{{ index + 1 }}. {{ question.question }}</p>
         <!-- Highlight chosen option with helper function -->
         <p v-for="(option, optionIndex) in question.options" :key="optionIndex"
-          :class="{ 'font-bold': optionIndex === examStore.userChoices[question.id] && optionIndex === question.correctOption, 'text-red-500': optionIndex === examStore.userChoices[question.id] && optionIndex !== question.correctOption, 'text-green-500': optionIndex === question.correctOption && (optionIndex !== examStore.userChoices[question.id] || optionIndex === examStore.userChoices[question.id] && optionIndex === question.correctOption) }">
+          :class="getOptionStyle(question, optionIndex)">
           {{ getOptionLabel(question, optionIndex) }}{{ option }}
         </p>
         <!-- Display correct or incorrect sign -->
-        <div class="mt-2" v-if="examStore.userChoices[question.id] !== undefined">
-          <div v-if="examStore.userChoices[question.id] === question.correctOption">
+        <div class="mt-2" v-if="hasUserChoice(question)">
+          <div v-if="isUserChoiceCorrect(question)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 class="w-6 h-6 inline-block align-middle stroke-green-500">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -55,12 +55,18 @@
                 class="w-6 h-6 inline-block align-middle stroke-red-500">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
-            <span class="mr-2 align-middle text-red-500">Inorrect</span>
+            <span class="mr-2 align-middle text-red-500">Incorrect</span>
           </div>
         </div>
       </div>
-     <!-- Button to Clear Results -->
-     <button @click="clearResults" class="bg-red-500 text-white px-4 py-2 rounded mt-4">Clear Results</button>
+
+      <!-- Two buttons for submitting results and trying again -->
+      <div class="flex justify-between mt-4">
+        <!-- Submit Results and Go to Index Page -->
+        <button @click="submitResults" class="bg-blue-500 text-white px-4 py-2 rounded">Submit Result & Go to Index</button>
+        <!-- Try Again (Clear Results) -->
+        <button @click="tryAgain" class="bg-red-500 text-white px-4 py-2 rounded">Try Again</button>
+      </div>
     </div>
 
     <!-- No Questions Message -->
@@ -70,16 +76,33 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import { useExamStore } from '~/store/exams';
+import { useUserStore } from '~/store/user';
 
+const router = useRouter(); // Access the router object
 const selectedOption = ref(null);
 const examStore = useExamStore();
+const userStore = useUserStore();
 
 onMounted(() => {
+  if (!userStore.getUserName) {
+    router.push('/');
+    return;
+  }
   examStore.fetchQuestions();
 });
+
+const hasUserChoice = (question) => {
+  return examStore.userChoices.some(choice => choice.questionId === question._id);
+};
+
+const isUserChoiceCorrect = (question) => {
+  const userChoice = examStore.userChoices.find(choice => choice.questionId === question._id);
+  return userChoice.answerIndex === question.correctOption;
+};
 
 const answerAndNext = () => {
   examStore.answerQuestion(selectedOption.value);
@@ -87,17 +110,44 @@ const answerAndNext = () => {
   selectedOption.value = null;
 };
 
-const clearResults = () => {
+const tryAgain = () => {
   // Clear user choices and reset to the beginning
-  examStore.userChoices = {};
+  examStore.userChoices = [];
   examStore.currentQuestionIndex = 0;
 };
 
+const submitResults = () => {
+  // Clear user choices and reset to the beginning
+
+  const resultsData = {
+    userName: userStore.getUserName,
+    quizResults: examStore.userChoices,
+  };
+
+  axios.post('/api/results', resultsData)
+    .then((response) => {
+      console.log('Quiz results sent successfully', response.data);
+      // Clear user choices and reset to the beginning
+      examStore.userChoices = [];
+      examStore.currentQuestionIndex = 0;
+      router.push('/');
+    })
+    .catch((error) => {
+      console.error('Error sending quiz results', error);
+      // Optionally, you may still want to clear results even if there's an error
+      examStore.userChoices = [];
+      examStore.currentQuestionIndex = 0;
+      router.push('/');
+    });
+};
+
 const getOptionStyle = (question, optionIndex) => {
+  const userChoice = examStore.userChoices.find(choice => choice.questionId === question._id);
+
   return {
     'font-bold': optionIndex === question.correctOption,
-    'text-red-500': optionIndex === examStore.userChoices[question.id] && optionIndex !== question.correctOption,
-    'text-green-500': optionIndex === question.correctOption && (optionIndex !== examStore.userChoices[question.id] || optionIndex === examStore.userChoices[question.id] && optionIndex === question.correctOption),
+    'text-red-500': userChoice && optionIndex === userChoice.answerIndex && optionIndex !== question.correctOption,
+    'text-green-500': optionIndex === question.correctOption && (userChoice === undefined || (optionIndex === userChoice.answerIndex && optionIndex === question.correctOption)),
   };
 };
 

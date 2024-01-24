@@ -1,7 +1,7 @@
-import { Question } from "../models/question";
+import { Question } from "../../models/question";
 
 export default defineEventHandler(async (event) => {
-  return Question.find().limit(5);
+  return Question.find();
   
   const drivingExamQuestionsData = [
     {

@@ -34,7 +34,7 @@
     <!-- Results Section -->
     <div v-if="examStore.isQuizCompleted" class="bg-white p-8 rounded shadow-md">
       <h2 class="text-xl font-bold mb-4">Quiz Results</h2>
-      <div v-for="(question, index) in examStore.questions" :key="index" class="mb-6 border-b pb-6">
+      <div v-for="(question, index) in examStore.questions.slice(0,5)" :key="index" class="mb-6 border-b pb-6">
         <p class="text-lg font-semibold mb-2">{{ index + 1 }}. {{ question.question }}</p>
         <!-- Highlight chosen option with helper function -->
         <p v-for="(option, optionIndex) in question.options" :key="optionIndex"
@@ -92,7 +92,7 @@ onMounted(() => {
     router.push('/');
     return;
   }
-  examStore.fetchQuestions();
+  examStore.fetchQuestions(true);
 });
 
 const hasUserChoice = (question) => {

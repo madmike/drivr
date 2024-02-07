@@ -1,6 +1,4 @@
-// src/router/index.ts
-
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import Index from '../views/Index.vue';
 import Quiz from '../views/Quiz.vue';
 

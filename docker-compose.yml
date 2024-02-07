@@ -1,0 +1,45 @@
+version: 3.8
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - $DB_PORT:$DB_PORT
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      # - MONGO_INITDB_ROOT_USERNAME=$DB_USER
+      # - MONGO_INITDB_ROOT_PASSWORD=$DB_PASSWORD
+    volumes:
+      - ./db:/data/db
+  nginx:
+    image: amadmike/drivr-nginx
+    container_name: nginx
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    ports:
+      - '80:80'
+    depends_on:
+      - app
+
+  app:
+    image: amadmike/drivr:latest
+    restart: unless-stopped
+    ports:
+      - $NODE_PORT:$NODE_PORT
+    env_file: ./.env
+    environment:
+      - NODE_PORT=$NODE_PORT
+      - MONGODB_URI=mongodb://mongodb/$DB_NAME
+      - DB_HOST=mongodb
+    volumes:
+      - ./public:/app/public
+    stdin_open: true
+    tty: true
+    depends_on:
+      - mongodb
+volumes:
+  db:

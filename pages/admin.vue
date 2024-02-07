@@ -1,111 +1,130 @@
-<!-- components/Admin.vue -->
-
 <template>
-  <div>
-    <h1 class="text-2xl font-bold mb-6">Admin Panel - Edit Questions</h1>
-    <!-- Loading Spinner -->
-    <div v-if="isLoading" class="spinner-container">
-      <!-- You can use your preferred loading spinner here -->
-      <div class="spinner"></div>
-    </div>
-    <!-- Button to create a new question -->
-    <button @click="showNewQuestionForm" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
-      Create New Question
-    </button>
-    <!-- New Question Form Dialog -->
-    <transition name="slide">
-      <!-- New Question Form (Initially hidden) -->
-    <div v-if="isNewQuestionFormVisible" class="bg-white p-8 rounded shadow-md mb-4">
-      <h2 class="text-xl font-bold mb-4">New Question</h2>
-      <form @submit.prevent="submitNewQuestion">
-        <!-- Add form fields for new question properties (e.g., question, options, correctOption) -->
-        <div class="mb-4">
-          <label class="block text-sm font-semibold mb-2">Question:</label>
-          <textarea v-model="newQuestion.question" class="w-full p-2 border rounded" rows="3" required></textarea>
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-semibold mb-2">Options (comma-separated):</label>
-          <input v-model="newQuestion.options" type="text" class="w-full p-2 border rounded" required />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-semibold mb-2">Correct Option (index):</label>
-          <input v-model="newQuestion.correctOption" type="number" class="w-full p-2 border rounded" required />
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
-      </form>
-    </div>
-    </transition>
-
-
-    <div v-if="questions.length > 0" class="bg-gray-100 min-h-screen p-8">
-      <!-- List of Questions -->
-      <ul>
-        <li v-for="(question, index) in questions" :key="index" class="bg-white p-4 mb-4 rounded shadow-md">
-          <div class="text-lg font-semibold mb-2">{{ question.question }}</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-            <label v-for="(option, optionIndex) in question.options" :key="optionIndex" class="flex items-center">
-              <input
-                type="radio"
-                v-model="question.correctOption"
-                :value="optionIndex"
-              />
-              {{ option }}
-            </label>
-          </div>
-          <button @click="saveQuestion(question)" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Save</button>
-        </li>
-      </ul>
-    </div>
+<div>
+  <!-- Loading Spinner -->
+  <div v-if="$store.isLoading" class="spinner-container">
+    <div class="spinner"></div>
   </div>
+
+  <Modal :show="openForm" @close="hideQuestionForm">
+    <template #title>
+      <h2 class="text-xl font-bold mb-4">New Question</h2>
+    </template>
+
+    <div class="flex mb-4">
+      <button @click="currentLanguage = 'en'" :class="currentLanguage === 'en' ? 'bg-gray-200' : ''" class="px-4 py-2 mr-2">English</button>
+      <button @click="currentLanguage = 'ru'" :class="currentLanguage === 'ru' ? 'bg-gray-200' : ''" class="px-4 py-2">Russian</button>
+    </div>
+    
+    <form @submit.prevent="submitQuestion">
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">Question:</label>
+        <textarea v-model="questionModel.question[currentLanguage]" class="w-full p-2 border rounded" rows="3" required></textarea>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div v-for="(option, optionIndex) in questionModel.options" :key="optionIndex" class="mb-4">
+          <label class="flex items-center gap-2 mb-2">
+            <input
+              type="radio"
+              v-model="questionModel.correctOption"
+              :value="optionIndex"
+            />
+            <input v-model="option[currentLanguage]" type="text" class="w-full p-2 border rounded" required />
+          </label>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-semibold mb-2">Description:</label>
+        <textarea v-model="questionModel.description[currentLanguage]" class="w-full p-2 border rounded" rows="3" required></textarea>
+      </div>
+    </form>
+
+    <template #footer>
+      <div class="flex gap-2">
+        <button @click="submitQuestion" class="bg-indigo-800 hover:bg-indigo-600 text-white px-4 py-2 rounded">Submit</button>
+        <button @click="hideQuestionForm" class="px-4 py-2 text-white bg-red-500 rounded">Close</button>
+      </div>
+    </template>
+  </Modal>
+
+  <div class="border-b border-gray-300">
+    <nav class="flex justify-between -mb-px">
+      <div class="flex grow">
+        <nuxt-link
+          to="/admin/results"
+          class="w-1/6 font-medium font-sm text-center border-b-2 border-transparent py-4 px-1 hover:text-indigo-800 hover:border-indigo-800"
+          active-class="text-indigo-800 !border-indigo-800"
+        >Results</nuxt-link>
+        <nuxt-link
+          to="/admin/questions"
+          class="w-1/6 font-medium font-sm text-center border-b-2 border-transparent py-4 px-1 hover:text-indigo-800 hover:border-indigo-800"
+          active-class="text-indigo-800 !border-indigo-800"
+        >Questions</nuxt-link>
+      </div>
+      <div v-if="$router.currentRoute.value.path.endsWith('questions')" class="flex h-14 w-14 p-3">
+        <button @click="openQuestionForm" class="flex w-full h-full items-center justify-center bg-white border text-indigo-800 border-indigo-800 rounded hover:border-indigo-600 hover:text-indigo-600">
+          <plus-icon class="w-6 h-6"></plus-icon>
+        </button>
+      </div>
+      <div v-else-if="$router.currentRoute.value.path.match('/results/.+')" class="flex h-14 w-14 p-3">
+        <button @click="$router.back" class="flex w-full h-full items-center justify-center bg-white border text-indigo-800 border-indigo-800 rounded hover:border-indigo-600 hover:text-indigo-600">
+          <arrow-uturn-left-icon class="w-6 h-6"></arrow-uturn-left-icon>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <div class="bg-gray-100 p-8">
+    <NuxtPage @editQuestion="setQuestion" />
+  </div>
+</div>
 </template>
 
-<script setup>
-import axios from 'axios';
-import { nextTick, watch, toRef } from 'vue';
-import { useExamStore } from '~/store/exams'; // Import useExamStore
+<script lang="ts" setup>
+import { PlusIcon, ArrowUturnLeftIcon } from '@heroicons/vue/20/solid';
+import { useQuestionStore } from '~/store/question';
+import type { TQuestion } from '~/types/question.type';
 
-const { fetchQuestions, saveQuestion, addQuestion } = useExamStore(); // Use useExamStore
+definePageMeta({
+  middleware: [
+    'auth-middleware',
+    (to, from) => to.path.endsWith('admin') ? navigateTo('/admin/results') : true,
+  ],
+});
+
+const $store = useQuestionStore();
+const $router = useRouter();
+const emptyQuestion = (): TQuestion => ({
+  question: { en: '', ru: '' },
+  options: Array(4).fill(() => ({ en: '', ru: '' })),
+  correctOption: 0,
+  description: { en: '', ru: '' },
+})
+
+const openForm = ref(false);
+const questionModel = ref(emptyQuestion());
+const currentLanguage = ref<'ru' | 'en'>('en');
 
 onMounted(async () => {
-  await fetchQuestions();
+  await $store.fetchQuestions();
 });
 
-const isNewQuestionFormVisible = ref(false);
-const newQuestion = ref({
-  question: '',
-  options: '',
-  correctOption: null,
-});
+const openQuestionForm = () => openForm.value = true;
+const hideQuestionForm = () => openForm.value = false;
 
-const showNewQuestionForm = () => {
-  isNewQuestionFormVisible.value = true;
-};
+const setQuestion = (question: TQuestion) => {
+  questionModel.value = question;
+  openQuestionForm();
+}
 
-
-const submitNewQuestion = async () => {
-  // Split options into an array
-  newQuestion.value.options = newQuestion.value.options.split(',').map(option => option.trim());
-
-  // Convert correctOption to a number
-  newQuestion.value.correctOption = parseInt(newQuestion.value.correctOption, 10);
-
-  // Add the new question to the store and send it to the server
-  await addQuestion(newQuestion.value);
+const submitQuestion = async () => {
+  console.log('submitQuestion')
+  questionModel.value.correctOption = parseInt(questionModel.value.correctOption as unknown as string, 10);
+  const method = questionModel.value._id ? 'updateQuestion' : 'addQuestion';
+  await $store[method](questionModel.value);
 
   // Clear the form and hide it
-  newQuestion.value = { question: '', options: '', correctOption: null };
-  isNewQuestionFormVisible.value = false;
+  questionModel.value = emptyQuestion();
+  hideQuestionForm();
 };
-
-const examStore = useExamStore();
-const questions = toRef(examStore, 'questions');
-const isLoading = toRef(examStore, 'isLoading');
-
-// Watch for changes
-watch(questions, (newQuestions) => {
-  console.log('Questions updated:', newQuestions);
-});
 
 </script>

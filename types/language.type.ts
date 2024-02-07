@@ -1,0 +1,1 @@
+export type TLanguage = Record<string, string>;

@@ -1,44 +1,65 @@
 <template>
-  <div>
-    <header>
+  <div class="h-full">
+    <header v-if="quiz.isQuizStarted || auth.authenticated">
         <!-- Navbar -->
-        <nav class="bg-blue-500 p-4 text-white">
+        <nav class="bg-indigo-950 p-4 text-white">
             <div class="container mx-auto">
                 <div class="flex justify-between items-center">
-                    <div class="text-2xl font-bold">Driving Exam</div>
-
+                    <div class="text-2xl font-bold">{{ quiz.isQuizStarted ? quiz.userName : $t('teacher_room') }}</div>
+                    <div v-if="quiz.isQuizStarted" class="flex flex-col gap-[2px] justify-center">
+                      <div class="flex justify-center">{{ Object.keys(quiz.questions).findIndex(id => id === quiz.currentQuestion?._id)+1 }} / {{ Object.keys(quiz.questions).length }}</div>
+                      <div class="flex h-2 w-32 rounded-sm overflow-hidden bg-white/20">
+                        <div class="bg-emerald-700" :style="`width: ${quiz.correctAnswersPercent}%`"></div>
+                        <div class="bg-rose-800" :style="`width: ${quiz.wrongAnswersPercent}%`"></div>
+                      </div>
+                    </div>
                     <!-- Navigation Links -->
                     <div class="flex items-center space-x-4">
-                        <nuxt-link to="/" class="hover:underline">Home</nuxt-link>
-                        <!-- <nuxt-link to="/login" class="hover:underline">Login</nuxt-link>
-                        <nuxt-link to="/logout" class="hover:underline">Logout</nuxt-link>
-                        <nuxt-link to="/help" class="hover:underline">Help</nuxt-link> -->
+                      <Select :selected="i18n.locale.value" :options="i18n.locales.value.map(l => ({id: l.code, value: l.name}))" @change-value="updateLocale" />
+                      <a
+                        href="#"
+                        @click="quit"
+                        class="block px-6 py-2 border border-gray-900 shadow-sm rounded-xl shadow-white/20 hover:bg-white/5"
+                      >
+                        {{ $t('quit') }}
+                      </a>
                     </div>
                 </div>
             </div>
         </nav>
     </header>
     <!-- Main Content -->
-    <div class="container mx-auto mt-8">
+    <div class="container mx-auto">
       <slot />
     </div>
-    <!-- Footer -->
-    <footer class="mt-8 text-center text-gray-500">
-        &copy; 2023 Driving Exam Questions
-    </footer>
+
   </div>
 </template>
+
 <script lang="ts" setup>
-import { storeToRefs } from 'pinia'; // import storeToRefs helper hook from pinia
-import { useAuthStore } from '../store/auth'; // import the auth store we just created
+import { useAuthStore } from '~/store/auth';
+import { useQuizStore } from '~/store/quiz';
+import { useResultsStore } from '~/store/results';
 
 const router = useRouter();
+const i18n = useI18n();
 
-const { logUserOut } = useAuthStore(); // use authenticateUser action from  auth store
-const { authenticated } = storeToRefs(useAuthStore()); // make authenticated state reactive with storeToRefs
+const auth = useAuthStore();
+const quiz = useQuizStore();
+const results = useResultsStore();
 
-const logout = () => {
-  logUserOut();
-  router.push('/login');
+const quit = () => {
+  if (quiz.isQuizStarted) {
+    quiz.quitQuiz();
+    results.resultsUID = null;
+  } else if (auth.authenticated) {
+    auth.logOut();
+  }
+
+  router.push('/');
 };
+
+const updateLocale = async (value:any) => {
+  i18n.setLocale(value.id);
+}
 </script>

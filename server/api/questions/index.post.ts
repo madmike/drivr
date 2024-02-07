@@ -4,22 +4,19 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   try {
-    console.log(body)
-    // Save quiz result to MongoDB
-    const { question, options, correctOption } = body;
-    const result = await Question.create({ question, options, correctOption });
+    // Save question to MongoDB
+    const { question, options, correctOption, description } = body;
+    const newQuestion = await Question.create({ question, options, correctOption, description });
 
-    console.log('Question is updated successfilly', result);
+    console.log('Question is created successfilly', newQuestion);
 
-    // Respond to the client
-    return result;
+    return newQuestion;
   } catch (error) {
-    console.error('Error updating question to MongoDB', error);
+    console.error('Error creating question in MongoDB', error);
 
-    // Respond to the client with an error
     throw createError({
       statusCode: 500,
-      statusMessage: 'Failed updating question',
+      statusMessage: 'Failed creating question',
     })
   }
 });

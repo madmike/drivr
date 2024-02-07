@@ -56,7 +56,7 @@
       <Results :answers="$store.getResults"></Results>
 
       <div class="flex justify-between mt-4">
-        <button @click="submitResults" class="bg-indigo-800 text-white px-4 py-2 rounded">{{ $t('submit') }}</button>
+        <button @click="submitResults" class="bg-indigo-800 text-white px-4 py-2 rounded">{{ $t('quit') }}</button>
         <button @click="clear" class="bg-rose-800 text-white px-4 py-2 rounded">{{ $t('try_again') }}</button>
       </div>
 

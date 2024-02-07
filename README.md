@@ -1,6 +1,7 @@
-# Nuxt 3 Minimal Starter
+# CDL Driver test systems
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Fullstack application for setting up in driving classes to prepare for CDL tests.
+It's needed to have a lan set up correctly with ip-addresses and computer names.
 
 ## Setup
 

@@ -7,22 +7,22 @@
 
   <Modal :show="openForm" @close="hideQuestionForm">
     <template #title>
-      <h2 class="text-xl font-bold mb-4">New Question</h2>
+      <h2 class="text-xl font-bold mb-4">{{ $t(questionModel._id ? 'new_question' : 'update_question') }}</h2>
     </template>
 
     <div class="flex mb-4">
       <button @click="currentLanguage = 'en'" :class="currentLanguage === 'en' ? 'bg-gray-200' : ''" class="px-4 py-2 mr-2">English</button>
-      <button @click="currentLanguage = 'ru'" :class="currentLanguage === 'ru' ? 'bg-gray-200' : ''" class="px-4 py-2">Russian</button>
+      <button @click="currentLanguage = 'ru'" :class="currentLanguage === 'ru' ? 'bg-gray-200' : ''" class="px-4 py-2">Русский</button>
     </div>
     
     <form @submit.prevent="submitQuestion">
       <div class="mb-4">
-        <label class="block text-sm font-semibold mb-2">Question:</label>
+        <label class="block text-sm font-semibold mb-2">{{ $t('question') }}:</label>
         <textarea v-model="questionModel.question[currentLanguage]" class="w-full p-2 border rounded" rows="3" required></textarea>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-2">
         <div v-for="(option, optionIndex) in questionModel.options" :key="optionIndex" class="mb-4">
-          <label class="flex items-center gap-2 mb-2">
+          <label class="flex items-center gap-2">
             <input
               type="radio"
               v-model="questionModel.correctOption"
@@ -33,15 +33,15 @@
         </div>
       </div>
       <div class="mb-4">
-        <label class="block text-sm font-semibold mb-2">Description:</label>
+        <label class="block text-sm font-semibold mb-2">{{ $t('description') }}:</label>
         <textarea v-model="questionModel.description[currentLanguage]" class="w-full p-2 border rounded" rows="3" required></textarea>
       </div>
     </form>
 
     <template #footer>
-      <div class="flex gap-2">
-        <button @click="submitQuestion" class="bg-indigo-800 hover:bg-indigo-600 text-white px-4 py-2 rounded">Submit</button>
-        <button @click="hideQuestionForm" class="px-4 py-2 text-white bg-red-500 rounded">Close</button>
+      <div class="flex gap-4">
+        <button @click="submitQuestion" class="bg-indigo-800 hover:bg-indigo-600 text-white px-4 py-2 rounded">{{ $t('submit') }}</button>
+        <button @click="hideQuestionForm" class="px-4 py-2 text-white bg-red-500 rounded">{{ $t('cancel') }}</button>
       </div>
     </template>
   </Modal>

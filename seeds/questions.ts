@@ -80,7 +80,7 @@ export const SeedQuestions: TQuestion[] = [
       { en: 'Only at intersections', ru: 'Только на перекрестках' },
       { en: 'Before starting the engine', ru: 'Перед запуском двигателя' }
     ],
-    correctOption: 2,
+    correctOption: 1,
     description: {
       en: 'Regularly checking mirrors helps maintain awareness of surrounding traffic and enhances overall safety while driving.',
       ru: 'Регулярная проверка зеркал помогает поддерживать осведомленность о движущемся транспорте вокруг и повышает общую безопасность во время движения.'

@@ -28,6 +28,12 @@
             </div>
         </nav>
     </header>
+    <header v-else>
+      <div class="relative z-10 container mx-auto flex justify-end py-5">
+        <nuxt-link v-if="!$route.path.match(/^\/(login|admin)/)" to="/admin" class="text-indigo-800 hover:text-indigo-600">{{ $t('go_admin') }}</nuxt-link>
+        <nuxt-link v-else to="/" class="text-center mb-5 text-indigo-800 hover:text-indigo-600">{{ $t('return_quiz') }}</nuxt-link>
+      </div>
+    </header>
     <!-- Main Content -->
     <div class="container mx-auto">
       <slot />

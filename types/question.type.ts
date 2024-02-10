@@ -6,4 +6,6 @@ export type TQuestion = {
   options: TLanguage[];
   correctOption: number;
   description: TLanguage;
+  type: string;
+  idx: number;
 }

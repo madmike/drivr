@@ -23,14 +23,13 @@
             :class="{
               'border-gray-200': !$store.hasCurrentChoice || (index !== $store.currentChoice && index !== $store.currentCorrect),
               '!border-rose-800 text-rose-800 bg-white': index === $store.currentChoice && !$store.isCurrentCorrect,
-              '!border-indigo-500 text-indigo-500 stroke-indigo-500 bg-white': index === $store.currentChoice && $store.isCurrentCorrect,
-              '!border-emerald-700 text-emerald-700 bg-white': $store.hasCurrentChoice && index !== $store.currentChoice && index === $store.currentCorrect,
+              '!border-emerald-700 text-emerald-700 bg-white': $store.hasCurrentChoice && index === $store.currentCorrect,
             }"
             class="h-full min-h-14 hover:bg-white hover:border-gray-400 flex items-center justify-between px-4 py-2 border-2 rounded-lg cursor-pointer text-sm  group"
           >
             <h2 class="text-lg font-medium text-gray-700">{{ option[locale] }}</h2>
             <svg v-if="index === $store.currentChoice && $store.isCurrentCorrect" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="shrink-0 w-9 h-9">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke="currentColor" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         </label>
@@ -46,13 +45,25 @@
 
       <!-- Navigation Buttons -->
       <div class="mt-8 flex justify-between">
-        <button @click="$store.previousQuestion" class="bg-indigo-800 text-white px-4 py-2 rounded" :class="{invisible: $store.currentIndex === 0}">{{ $t('previous') }}</button>
-        <button @click="answerAndNext" class="bg-indigo-800 text-white px-4 py-2 rounded">{{ $t('next') }}</button>
+        <button
+          @click="$store.previousQuestion"
+          class="bg-indigo-800 hover:bg-indigo-600 text-white px-4 py-2 rounded"
+          :class="$store.currentIndex === 0 && 'invisible'"
+        >
+          {{ $t('previous') }}
+        </button>
+        <button
+          @click="answerAndNext"
+          class="bg-indigo-800 hover:bg-indigo-600 text-white px-4 py-2 rounded"
+          :class="!($store.currentChoice >= 0) && 'invisible'"
+        >
+          {{ $t('next') }}
+        </button>
       </div>
     </div>
     <!-- Results Section -->
     <div v-if="$store.isQuizCompleted" class="bg-gray-100 p-8 shadow-md">
-      <h2 class="text-xl font-bold mb-4">{{ t('results') }}</h2>
+      <h2 class="text-xl font-bold mb-4">{{ t('quiz_results') }}</h2>
       <Results :answers="$store.getResults"></Results>
 
       <div class="flex justify-between mt-4">

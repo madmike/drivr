@@ -1,10 +1,10 @@
 <template>
   <div v-if="$store.answers">
-    <h2 class="text-xl font-bold mb-4">{{ $t('results') }} for user {{ $store.currentUser }}</h2>
+    <h2 class="text-xl font-bold mb-4">{{ $t('quiz_results') }} {{ $t('for_user') }} {{ $store.currentUser }}</h2>
     <Results :answers="$store.answers"></Results>
   </div>
   <div v-else>
-    No results found
+    {{ $t('no_results') }}
   </div>
 </template>
 

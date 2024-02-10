@@ -2,12 +2,19 @@ import { defineStore } from 'pinia';
 import type { TQuestion } from '~/types/question.type';
 
 interface IQuestionState {
+  categories: { _id: string, sections: number, questions: number }[];
+  totalDocs: number;
+  totalPages: number;
   questions: TQuestion[];
   isLoading: boolean;
 }
 
 export const useQuestionStore = defineStore('question', {
   state: (): IQuestionState => ({
+    categories: [],
+    totalDocs: 0,
+    totalPages: 0,
+    currentPage: 1,
     questions: [],
     isLoading: true,
   }),
@@ -17,14 +24,26 @@ export const useQuestionStore = defineStore('question', {
   },
 
   actions: {
+    async fetchCategories() {
+      try {
+        this.isLoading = true; // Set loading to true
+        const response = await fetch('/api/questions/categories');
+        this.categories = await response.json();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.isLoading = false; // Set loading to false, whether successful or not
+      }
+    },
+
     async fetchQuestions(page = 1) {
       try {
         this.isLoading = true; // Set loading to true
-
         const response = await fetch('/api/questions?page='+page);
-        const questions: TQuestion[] = await response.json();
-        
-        this.questions = questions;
+        const result = await response.json();
+        this.questions = result.docs;
+        this.totalDocs = result.totalDocs;
+        this.totalPages = result.totalPages;
       } catch (error) {
         console.error(error);
       } finally {

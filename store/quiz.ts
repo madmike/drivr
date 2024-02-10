@@ -6,6 +6,8 @@ import type { TAnswer } from '~/types/result.type';
 
 interface IQuizState {
   userName: string;
+  currentCategory: string;
+  currentSection: number;
   started: boolean;
   questions: Record<string, TQuestion>;
   currentQuestion: TQuestion | null;
@@ -18,6 +20,8 @@ interface IQuizState {
 export const useQuizStore = defineStore('quiz', {
   state: (): IQuizState => ({
     userName: '',
+    currentCategory: '',
+    currentSection: -2,
     started: false,
     questions: {},
     currentQuestion: null,
@@ -53,6 +57,9 @@ export const useQuizStore = defineStore('quiz', {
   },
 
   actions: {
+    setCategory(category: string) {
+      this.currentCategory = category;
+    },
     startQuiz(name: string) {
       if (!name) {
         return;
@@ -77,7 +84,7 @@ export const useQuizStore = defineStore('quiz', {
     async fetchQuestions() {
       try {
         this.isLoading = true; // Set loading to true
-        const response = await fetch('/api/questions/random');
+        const response = await fetch(`/api/questions/random?category=${this.currentCategory}&section=${this.currentSection}`);
         const questions: TQuestion[] = await response.json();
         this.questions = questions.reduce((res, q) => ({ ...res, [q._id as string]: q}), {} as Record<string, TQuestion>);
         this.currentQuestion = questions[0];

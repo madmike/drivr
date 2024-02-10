@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen items-center justify-center gap-y-5">
+  <div class="absolute inset-0 flex flex-col h-screen items-center justify-center gap-y-5">
     <!-- Start Page -->
     <div class="text-white text-center p-8 bg-indigo-950 rounded-lg">
       <h2 class="text-3xl font-semibold mb-6">{{ $t('enter_admin') }}</h2>
@@ -24,8 +24,6 @@
         <button type="submit" class="mt-6 bg-indigo-700 hover:bg-indigo-800 text-white px-6 py-2 rounded-md">{{ $t('login') }}</button>
       </form>
     </div>
-
-    <nuxt-link to="/" class="text-center mb-5 text-indigo-800 hover:text-indigo-600">{{ $t('return_quiz') }}</nuxt-link>
   </div>
 </template>
 

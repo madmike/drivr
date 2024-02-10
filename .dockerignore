@@ -8,6 +8,7 @@
 .output
 public
 node_modules
+questions
 
 # Environment (contains sensitive data)
 .env
